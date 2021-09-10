@@ -38,8 +38,12 @@ public class LangtonAnt {
         
         win.sim_view.inicializaMundo(imgDraw, DIM_CELDA, DIM_SIMUL_IMG, DIM_SIMUL_IMG, NUM_CELDAS);
         win.sim_view.muestraMundo(buffImg);
+        
+        World m = win.world;
+        
 
         /*AQUI INICIA TODA LA LOGICA DEL PROGRAMA*/
+        /*
         Ant ant = new Ant(NUM_CELDAS,NUM_CELDAS);
         int ant_x;
         int ant_y;
@@ -84,7 +88,7 @@ public class LangtonAnt {
             imgDraw.setColor(Color.RED);
             imgDraw.fillRect(img_ant_x, img_ant_y, 4,4);
             
-            /*EN PAUSA*/
+            //EN PAUSA
             while(!win.running){
                 win.sim_view.muestraMundo(buffImg);
                 try {
@@ -117,5 +121,6 @@ public class LangtonAnt {
             
             i++;
         }
+        */
     }
 }

@@ -11,7 +11,7 @@ public class ToolsPanel extends JPanel{
     
     public int celTotales;
     public JLabel generacion,celdas_negras,hormigas;
-    public JButton start_sim,zoom_out,zoom_in;
+    public JButton start_sim,zoom_out,zoom_in, new_ant;
     public JComboBox hormiga_orientacion;
     
     ToolsPanel(int dimensionSimul, int dimenTool){
@@ -42,9 +42,14 @@ public class ToolsPanel extends JPanel{
         start_sim.setEnabled(false);
         this.add(start_sim);
         
-        hormiga_orientacion = new JComboBox(new String[]{"Derecha","Izquierda","Arriba","Abajo"});
+        new_ant = new JButton("Agrega");
+        new_ant.setBounds(90, 93, 90, 30);
+        new_ant.setEnabled(true);
+        this.add(new_ant);
+        
+        /*hormiga_orientacion = new JComboBox(new String[]{"Derecha","Izquierda","Arriba","Abajo"});
         hormiga_orientacion.setBounds(90, 93, 90, 30);
-        this.add(hormiga_orientacion);
+        this.add(hormiga_orientacion);*/
         
         zoom_out = new JButton("Zoom -");
         zoom_out.setBounds(5, 124, 80, 30);
