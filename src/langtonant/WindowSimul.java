@@ -122,17 +122,18 @@ public class WindowSimul extends JFrame{
     
     public void startSimulation(){
         int generation = 0;
-        while(true){
+        while(generation<20){
             /*PINTA LAS HORMIGAS*/
             for(Ant a: world.ants){
                 worldDraw.setColor(Color.RED);
                 worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getX()*(DIM_CELDA+1), 4,4);
+                System.out.println("Una hormiga en ("+a.getX()+","+a.getY()+")");
             }
             /*EN PAUSA*/
             while(!running){
                 sim_view.muestraMundo(worldImg);
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(500);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -141,7 +142,7 @@ public class WindowSimul extends JFrame{
             sim_view.muestraMundo(worldImg);
             tool.actualizaDatos(generation,1,1);
             try {
-                Thread.sleep(17);
+                Thread.sleep(300);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -152,6 +153,7 @@ public class WindowSimul extends JFrame{
                 else
                     worldDraw.setColor(Color.WHITE);
                 worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
+                System.out.println("Hormiga avanzo ("+a.getX_antes()+","+a.getY_antes()+")");
             }
             
             generation++;
