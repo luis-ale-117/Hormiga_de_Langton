@@ -15,7 +15,7 @@ public class Ant {
         pos_anterior[0]=10;
         pos_anterior[1]=10;
         orientacion = 'U';//L:left, R:right, U:up, D:down
-        color_siguiente = 0;
+        color_siguiente = 1;
         limit_x = 1000;
         limit_y = 1000;
     }
@@ -25,6 +25,7 @@ public class Ant {
         pos_anterior[0]=0;
         pos_anterior[1]=0;
         orientacion = 'U';//L:left, R:right, U:up, D:down
+        color_siguiente = 1;
         limit_x = lim_x;
         limit_y = lim_y;
     }
@@ -68,17 +69,24 @@ public class Ant {
         pos_anterior[1]=pos_actual[0];
         if(orientacion=='U'){//Y
             pos_actual[1]--;
-            pos_actual[1] = pos_actual[1]>=0? pos_actual[1]:limit_y-1;
+            //pos_actual[1] = pos_actual[1]>=0? pos_actual[1]:limit_y-1;
         }else if(orientacion=='L'){//X
             pos_actual[0]--;
-            pos_actual[0] = pos_actual[0]>=0? pos_actual[0]:limit_x-1;
+            //pos_actual[0] = pos_actual[0]>=0? pos_actual[0]:limit_x-1;
         }else if(orientacion=='D'){//Y
             pos_actual[1]++;
-            pos_actual[1] = pos_actual[1]<limit_y? pos_actual[1]:0;
+            //pos_actual[1] = pos_actual[1]<limit_y? pos_actual[1]:0;
         }else{
             pos_actual[0]++;//X
-            pos_actual[0] = pos_actual[0]<limit_x? pos_actual[0]:0;
+            //pos_actual[0] = pos_actual[0]<limit_x? pos_actual[0]:0;
         }
+    }
+    public void setPos(int x,int y){
+        pos_actual[0] = x;
+        pos_actual[1] = y;
+    }
+    public void setOri(char ori){
+        orientacion = ori;
     }
     public void setPosOri(int x,int y,char ori){
         pos_actual[0] = x;
@@ -99,6 +107,9 @@ public class Ant {
     }
     public int getY_antes(){
         return pos_anterior[1];
+    }
+    public byte getColorSiguiente(){
+        return color_siguiente;
     }
     public boolean isOutOfLimits(){
         return pos_actual[0]>= limit_x || pos_actual[1]>=limit_y||pos_actual[0]<0||pos_actual[1]<0;

@@ -19,7 +19,7 @@ public class SimulPanel extends JPanel{
         super();
         simulDimension_x = dimension;
         simulDimension_y = dimension;
-        linesColor = new Color(255,255,255);
+        linesColor = new Color(210,210,210);
         this.setPreferredSize(new Dimension(simulDimension_x,simulDimension_y));
     }
     public void muestraMundo(BufferedImage buffImg){

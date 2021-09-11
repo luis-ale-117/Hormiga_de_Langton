@@ -4,8 +4,12 @@ package langtonant;
 import java.util.ArrayList;
 
 public class World {
+    
+    private static final byte POS_WHITE=0;
+    private static final byte POS_BLACK=1;
+    
     public boolean toroidal;
-    public boolean antOutOfBounds;
+    public boolean anyAntOutOfBounds;
     public byte[][] world;
     public int lim_x;
     public int lim_y;
@@ -13,7 +17,7 @@ public class World {
     
     World(int celdas){
         toroidal = true;
-        antOutOfBounds = false;
+        anyAntOutOfBounds = false;
         world = new byte[celdas][celdas];
         lim_x = celdas;
         lim_y = celdas;
@@ -25,20 +29,38 @@ public class World {
     public void addAnt(int x, int y,char ori,byte color){
         ants.add(new Ant(x,y,ori,lim_x,lim_y,color));
     }
+    public void addAnt(Ant a){
+        ants.add(a);
+    }
     public boolean isToroidal(){
         return toroidal;
     }
-    public void giraHormigas(){
+    public void turnAnts(){
         for(Ant ant: ants)
             ant.gira(world[ant.getX()][ant.getY()]);
     }
-    public void mueveHormigas(){
+    public void moveAnts(){
         for(Ant ant: ants){
             ant.avanza();
-            antOutOfBounds = antOutOfBounds || ant.isOutOfLimits();
+            anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
         }
     }
-    public void cambiaColorCeldas(){
+    public void updateAntsPos(){
+        for(Ant ant: ants){
+            ant.gira(world[ant.getX()][ant.getY()]);
+            ant.avanza();
+            anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
+            if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
+                world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
+            }
+            if(world[ant.getX()][ant.getY()]==POS_WHITE){
+                ant.setColorSiguiente(POS_BLACK);   
+            }else{
+                ant.setColorSiguiente(POS_WHITE);
+            }
+        }
+    }
+    public void changeAntsCellsState(){
         for(Ant ant: ants){
             if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
                 world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
