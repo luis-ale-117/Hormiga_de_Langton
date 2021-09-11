@@ -122,18 +122,17 @@ public class WindowSimul extends JFrame{
     
     public void startSimulation(){
         int generation = 0;
-        while(generation<20){
+        while(true){
             /*PINTA LAS HORMIGAS*/
             for(Ant a: world.ants){
                 worldDraw.setColor(Color.RED);
-                worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getX()*(DIM_CELDA+1), 4,4);
-                System.out.println("Una hormiga en ("+a.getX()+","+a.getY()+")");
+                worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
             }
             /*EN PAUSA*/
             while(!running){
                 sim_view.muestraMundo(worldImg);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(30);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -142,18 +141,17 @@ public class WindowSimul extends JFrame{
             sim_view.muestraMundo(worldImg);
             tool.actualizaDatos(generation,1,1);
             try {
-                Thread.sleep(300);
+                Thread.sleep(10);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
             /*PINTA LAS CELDAS DONDE ESTUVIERON LAS HORMIGAS*/
             for(Ant a: world.ants){
-                if(world.getPosColor(a.getX_antes(), a.getY_antes())==POS_WHITE)
-                    worldDraw.setColor(Color.BLACK);
-                else
+                if(world.world[a.getX_antes()][a.getY_antes()]==POS_WHITE)
                     worldDraw.setColor(Color.WHITE);
+                else
+                    worldDraw.setColor(Color.BLACK);
                 worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
-                System.out.println("Hormiga avanzo ("+a.getX_antes()+","+a.getY_antes()+")");
             }
             
             generation++;
@@ -181,9 +179,8 @@ public class WindowSimul extends JFrame{
             temp_ant_x = ((int)e.getX())/(DIM_CELDA+1);
             temp_ant_y = ((int)e.getY())/(DIM_CELDA+1);
             temp_ant_color = world.getPosColor(temp_ant_x, temp_ant_y);
-            temp_ant_color = temp_ant_color==POS_WHITE?POS_BLACK:POS_WHITE;
             temp_ant.setPos(temp_ant_x, temp_ant_y);
-            temp_ant.setColorSiguiente(temp_ant_color);
+            temp_ant.setColorActual(temp_ant_color);
             
             worldDraw.setColor(Color.RED);
             worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga

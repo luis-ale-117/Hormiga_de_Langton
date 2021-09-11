@@ -48,16 +48,13 @@ public class World {
     public void updateAntsPos(){
         for(Ant ant: ants){
             ant.gira(world[ant.getX()][ant.getY()]);
+            if(world[ant.getX()][ant.getY()] == ant.color_actual){
+                world[ant.getX()][ant.getY()] = ant.color_siguiente;
+            }
             ant.avanza();
-            anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
-            if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
-                world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
-            }
-            if(world[ant.getX()][ant.getY()]==POS_WHITE){
-                ant.setColorSiguiente(POS_BLACK);   
-            }else{
-                ant.setColorSiguiente(POS_WHITE);
-            }
+            //anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
+            
+            ant.setColorActual(world[ant.getX()][ant.getY()]);
         }
     }
     public void changeAntsCellsState(){
