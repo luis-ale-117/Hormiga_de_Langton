@@ -117,7 +117,8 @@ public class WindowSimul extends JFrame{
     
     public void initWorld(){
         sim_view.inicializaMundo(worldDraw, DIM_CELDA, DIM_SIMUL_IMG, DIM_SIMUL_IMG, NUM_CELDAS);
-        sim_view.muestraMundo(worldImg);
+        sim_view.setSimImg(worldImg);
+        sim_view.muestraMundo();
     }
     
     public void startSimulation(){
@@ -130,7 +131,7 @@ public class WindowSimul extends JFrame{
             }
             /*EN PAUSA*/
             while(!running){
-                sim_view.muestraMundo(worldImg);
+                sim_view.muestraMundo();
                 try {
                     Thread.sleep(30);
                 } catch (InterruptedException ex) {
@@ -138,7 +139,7 @@ public class WindowSimul extends JFrame{
                 }
             }
             world.updateAntsPos();
-            sim_view.muestraMundo(worldImg);
+            sim_view.muestraMundo();
             tool.actualizaDatos(generation,1,1);
             try {
                 Thread.sleep(1);

@@ -12,6 +12,7 @@ public class SimulPanel extends JPanel{
     private int simulDimension_x;
     private int simulDimension_y;
     private Color linesColor;
+    private BufferedImage simImg;
     
     //private int cell_size,x_dim,y_dim,num_celdas;
     
@@ -22,9 +23,10 @@ public class SimulPanel extends JPanel{
         linesColor = new Color(210,210,210);
         this.setPreferredSize(new Dimension(simulDimension_x,simulDimension_y));
     }
-    public void muestraMundo(BufferedImage buffImg){
-        Graphics g = this.getGraphics();
-        g.drawImage(buffImg, 0, 0,simulDimension_x,simulDimension_y,this);
+    public void muestraMundo(){
+        //Graphics g = this.getGraphics();
+        //g.drawImage(simImg, 0, 0,simulDimension_x,simulDimension_y,this);
+        repaint();
     }
     public void inicializaMundo(Graphics g,int cell_size,int x_dim,int y_dim, int num_celdas){
         //this.cell_size=cell_size;
@@ -45,6 +47,13 @@ public class SimulPanel extends JPanel{
         simulDimension_x = x;
         simulDimension_y = y;
         this.setPreferredSize(new Dimension(x,y));
+    }
+    public void setSimImg(BufferedImage img){
+        simImg = img;
+    }
+    @Override
+    public void paint(Graphics g){
+        g.drawImage(simImg, 0, 0,simulDimension_x,simulDimension_y,this);
     }
     /*private void paintLines(Graphics g){
         g.setColor(linesColor);
