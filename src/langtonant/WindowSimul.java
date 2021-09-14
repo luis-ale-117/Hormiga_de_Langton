@@ -141,7 +141,7 @@ public class WindowSimul extends JFrame{
             sim_view.muestraMundo(worldImg);
             tool.actualizaDatos(generation,1,1);
             try {
-                Thread.sleep(10);
+                Thread.sleep(1);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -162,10 +162,6 @@ public class WindowSimul extends JFrame{
         running = !running;
         if(running){
             tool.start_sim.setText("Pausa");
-            if(place_ant){
-                world.addAnt(temp_ant);//Agregamos la hormiga al mundo
-                place_ant = false;
-            }
         }
         else{
             tool.start_sim.setText("Sigue");
@@ -184,8 +180,9 @@ public class WindowSimul extends JFrame{
             
             worldDraw.setColor(Color.RED);
             worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga
+            world.addAnt(temp_ant);//Agregamos la hormiga al mundo
         }
-        //place_ant = false;
+        place_ant = false;
         tool.start_sim.setEnabled(true);
     }
     private void zoomOut(){
