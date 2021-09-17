@@ -140,7 +140,7 @@ public class WindowSimul extends JFrame{
             }
             world.updateAntsPos();
             sim_view.muestraMundo();
-            tool.actualizaDatos(generation,1,1);
+            tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
             try {
                 Thread.sleep(1);
             } catch (InterruptedException ex) {

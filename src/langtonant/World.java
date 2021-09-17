@@ -8,6 +8,8 @@ public class World {
     private static final byte POS_WHITE=0;
     private static final byte POS_BLACK=1;
     
+    public int num_black;
+    
     public boolean toroidal;
     public boolean anyAntOutOfBounds;
     public byte[][] world;
@@ -22,6 +24,7 @@ public class World {
         lim_x = celdas;
         lim_y = celdas;
         ants = new ArrayList<Ant>();
+        num_black = 0;
     }
     public void addAnt(){
         ants.add(new Ant(lim_x,lim_y));
@@ -50,6 +53,11 @@ public class World {
             ant.gira(world[ant.getX()][ant.getY()]);
             if(world[ant.getX()][ant.getY()] == ant.color_actual){
                 world[ant.getX()][ant.getY()] = ant.color_siguiente;
+                if(ant.color_siguiente == POS_BLACK){
+                    num_black++;
+                }else{
+                    num_black--;
+                }
             }
             ant.avanza();
             //anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
@@ -66,5 +74,12 @@ public class World {
     }
     public byte getPosColor(int x, int y){
         return world[x][y];
+    }
+    
+    public int getNumAnts(){
+        return ants.size();
+    }
+    public int getNumBlack(){
+        return num_black;
     }
 }
