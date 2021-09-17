@@ -142,7 +142,7 @@ public class WindowSimul extends JFrame{
                 worldDraw.setColor(Color.RED);
                 worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
             }
-            gr.updateBlackGraph(generation, world.getNumBlack());
+            gr.updateGraphs(generation, world.getNumBlack());
             /*EN PAUSA*/
             while(!running){
                 sim_view.muestraMundo();

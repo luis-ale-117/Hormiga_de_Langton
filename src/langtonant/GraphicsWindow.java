@@ -12,11 +12,10 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 public class GraphicsWindow extends JFrame{
-    JPanel mainPanel;
-    XYSeries data_black_cells;
-    XYSeriesCollection black_cell_series;
-    JFreeChart black_cells_graph;
-    ChartPanel bc_chart;
+    XYSeries data_black_cells,log_data_black_cells;
+    XYSeriesCollection black_cell_series,log_black_cell_series;
+    JFreeChart black_cells_graph,log_black_cells_graph;
+    ChartPanel bc_chart,log_bc_chart;
     
     GraphicsWindow(){
         super();
@@ -29,28 +28,27 @@ public class GraphicsWindow extends JFrame{
         init_components();
     }
     private void init_components(){
-        //mainPanel = new JPanel();
-        //mainPanel.setBounds(0,0, 700, 700);
-        //mainPanel.setBackground(Color.gray);
-        //mainPanel.setLayout(null);
-        //add(mainPanel);
         
         data_black_cells = new XYSeries("Celdas negras");
-        data_black_cells.add(0, 0);
-        /*data_black_cells.add(2, 7);
-        data_black_cells.add(3, 1);
-        data_black_cells.add(4, 5);
-        */
         black_cell_series = new XYSeriesCollection();
         black_cell_series.addSeries(data_black_cells);
-        
         black_cells_graph = ChartFactory.createXYLineChart("Celdas negras ocupadas","Generacion","Celdas",black_cell_series,PlotOrientation.VERTICAL,true,false,false);
-        
         bc_chart = new ChartPanel(black_cells_graph);
         bc_chart.setBounds(0, 0, 400, 300);
         add(bc_chart);
+        
+        log_data_black_cells = new XYSeries("Celdas negras en log");
+        log_black_cell_series = new XYSeriesCollection();
+        log_black_cell_series.addSeries(log_data_black_cells);
+        log_black_cells_graph = ChartFactory.createXYLineChart("Logaritmo celdas negras","Generacion","Log celdas",log_black_cell_series,PlotOrientation.VERTICAL,true,false,false);
+        log_bc_chart = new ChartPanel(log_black_cells_graph);
+        log_bc_chart.setBounds(0, 305, 400, 300);
+        add(log_bc_chart);
     }
-    public void updateBlackGraph(int generation, int num_black){
+    public void updateGraphs(int generation, int num_black){
         data_black_cells.add(generation, num_black);
+        if(Math.log10(num_black)<0)
+            log_data_black_cells.add(generation,0.1);
+        else log_data_black_cells.add(generation,Math.log10(num_black));
     }
 }
