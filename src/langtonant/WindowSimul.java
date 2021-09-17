@@ -37,6 +37,7 @@ public class WindowSimul extends JFrame{
     private JScrollPane scrollpanel;
     public SimulPanel sim_view;
     public ToolsPanel tool;
+    public GraphicsWindow gr;
     
     /*FLAGS*/
     public boolean running,place_ant;
@@ -73,6 +74,10 @@ public class WindowSimul extends JFrame{
         tool = new ToolsPanel(DIM_VENTANA-50,DIM_TOOLS+50);
         this.add(tool);
         
+        
+        gr =  new GraphicsWindow();
+        gr.setVisible(true);
+        
         tool.start_sim.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -101,6 +106,13 @@ public class WindowSimul extends JFrame{
             }
         });
         
+        tool.graph.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showGraphicsWin();
+            }
+        });
+        
         running = false;
         place_ant = false;
         
@@ -118,6 +130,7 @@ public class WindowSimul extends JFrame{
     public void initWorld(){
         sim_view.inicializaMundo(worldDraw, DIM_CELDA, DIM_SIMUL_IMG, DIM_SIMUL_IMG, NUM_CELDAS);
         sim_view.setSimImg(worldImg);
+        sim_view.setSimImgDraw(worldDraw);
         sim_view.muestraMundo();
     }
     
@@ -129,6 +142,7 @@ public class WindowSimul extends JFrame{
                 worldDraw.setColor(Color.RED);
                 worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
             }
+            gr.updateBlackGraph(generation, world.getNumBlack());
             /*EN PAUSA*/
             while(!running){
                 sim_view.muestraMundo();
@@ -153,6 +167,12 @@ public class WindowSimul extends JFrame{
                 else
                     worldDraw.setColor(Color.BLACK);
                 worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
+            }
+            if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite()){
+                sim_view.paintLinesGray();
+            }
+            if(DIM_SIMUL_IMG < 5000 && sim_view.linesColorGray()){
+                sim_view.paintLinesWhite();
             }
             
             generation++;
@@ -193,12 +213,18 @@ public class WindowSimul extends JFrame{
             scrollpanel.setViewportView(sim_view);
         }
         
+        if(DIM_SIMUL_IMG < 5000 && sim_view.linesColorGray() && !running){
+            sim_view.paintLinesWhite();
+        }
     }
     private void zoomIn(){
         if(DIM_SIMUL_IMG < 18000){
             DIM_SIMUL_IMG += 400;
             sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
             scrollpanel.setViewportView(sim_view);
+        }
+        if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
+                sim_view.paintLinesGray();
         }
     }
     private void createAnt(){
@@ -220,5 +246,8 @@ public class WindowSimul extends JFrame{
             else
                 temp_ant.setOri('D');
         }
+    }
+    private void showGraphicsWin(){
+        gr.setVisible(true);
     }
 }

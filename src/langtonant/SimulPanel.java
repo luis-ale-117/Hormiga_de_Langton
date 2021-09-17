@@ -9,33 +9,33 @@ import java.awt.image.BufferedImage;
 
 public class SimulPanel extends JPanel{
     
+    private static final Color Gray = new Color(210,210,210);
+    
     private int simulDimension_x;
     private int simulDimension_y;
     private Color linesColor;
     private BufferedImage simImg;
+    private Graphics simDraw;
     
-    //private int cell_size,x_dim,y_dim,num_celdas;
-    
+    private int cell_size,x_dim,y_dim,num_celdas;
     SimulPanel(int dimension){
         super();
         simulDimension_x = dimension;
         simulDimension_y = dimension;
-        linesColor = new Color(210,210,210);
+        linesColor = Gray;
         this.setPreferredSize(new Dimension(simulDimension_x,simulDimension_y));
     }
     public void muestraMundo(){
-        //Graphics g = this.getGraphics();
-        //g.drawImage(simImg, 0, 0,simulDimension_x,simulDimension_y,this);
         repaint();
     }
     public void inicializaMundo(Graphics g,int cell_size,int x_dim,int y_dim, int num_celdas){
-        //this.cell_size=cell_size;
-        //this.x_dim= x_dim;
-        //this.y_dim =y_dim;
-        //this.num_celdas = num_celdas;
+        this.cell_size=cell_size;
+        this.x_dim= x_dim;
+        this.y_dim =y_dim;
+        this.num_celdas = num_celdas;
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, x_dim-1, y_dim-1);
-        g.setColor(linesColor);
+        g.setColor(Gray);
         for(int i=1;i<num_celdas;i++){
             g.drawLine(cell_size*i+i-1, 0, cell_size*i+i-1,y_dim-1);//Vertical
         }
@@ -51,17 +51,37 @@ public class SimulPanel extends JPanel{
     public void setSimImg(BufferedImage img){
         simImg = img;
     }
+    public void setSimImgDraw(Graphics imgGr){
+        simDraw = imgGr;
+    }
     @Override
     public void paint(Graphics g){
         g.drawImage(simImg, 0, 0,simulDimension_x,simulDimension_y,this);
     }
-    /*private void paintLines(Graphics g){
-        g.setColor(linesColor);
+    public void paintLinesWhite(){
+        linesColor = Color.WHITE;
+        simDraw.setColor(Color.WHITE);
         for(int i=1;i<num_celdas;i++){
-            g.drawLine(cell_size*i+i-1, 0, cell_size*i+i-1,y_dim-1);//Vertical
+            simDraw.drawLine(cell_size*i+i-1, 0, cell_size*i+i-1,y_dim-1);//Vertical
         }
         for(int i=1;i<num_celdas;i++){
-            g.drawLine(0, cell_size*i+i-1, x_dim-1,cell_size*i+i-1);//Horizontal
+            simDraw.drawLine(0, cell_size*i+i-1, x_dim-1,cell_size*i+i-1);//Horizontal
         }
-    }*/
+    }
+    public void paintLinesGray(){
+        linesColor = Gray;
+        simDraw.setColor(Gray);
+        for(int i=1;i<num_celdas;i++){
+            simDraw.drawLine(cell_size*i+i-1, 0, cell_size*i+i-1,y_dim-1);//Vertical
+        }
+        for(int i=1;i<num_celdas;i++){
+            simDraw.drawLine(0, cell_size*i+i-1, x_dim-1,cell_size*i+i-1);//Horizontal
+        }
+    }
+    public boolean linesColorWhite(){
+        return linesColor.equals(Color.WHITE);
+    }
+    public boolean linesColorGray(){
+        return linesColor.equals(Gray);
+    }
 }

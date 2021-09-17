@@ -11,7 +11,7 @@ public class ToolsPanel extends JPanel{
     
     public int celTotales;
     public JLabel generacion,celdas_negras,hormigas;
-    public JButton start_sim,zoom_out,zoom_in, new_ant;
+    public JButton start_sim,zoom_out,zoom_in, new_ant,graph;
     public JComboBox hormiga_orientacion;
     
     ToolsPanel(int dimensionSimul, int dimenTool){
@@ -26,11 +26,11 @@ public class ToolsPanel extends JPanel{
     
     private void initComponents(){
         generacion = new JLabel("Generacion: ");
-        generacion.setBounds(5, 0, 120, 30);
+        generacion.setBounds(5, 0, 180, 30);
         this.add(generacion);
         
         celdas_negras = new JLabel("Celdas negras: ");
-        celdas_negras.setBounds(5, 31, 120, 30);
+        celdas_negras.setBounds(5, 31, 180, 30);
         this.add(celdas_negras);
         
         hormigas = new JLabel("Hormigas: ");
@@ -60,11 +60,11 @@ public class ToolsPanel extends JPanel{
         zoom_in.setBounds(90, 124, 80, 30);
         zoom_in.setEnabled(true);
         this.add(zoom_in);
-        /*
-        sanas = new JLabel("Sanas: ");
-        sanas.setBounds(5, 155, 120, 30);
-        this.add(sanas);
         
+        graph = new JButton("Graficas");
+        graph.setBounds(5, 155, 120, 30);
+        this.add(graph);
+        /*
         porcentajeSanas = new JLabel("%Sanas: ");
         porcentajeSanas.setBounds(5, 186, 120, 30);
         this.add(porcentajeSanas);
