@@ -82,4 +82,46 @@ public class World {
     public int getNumBlack(){
         return num_black;
     }
+    public void resetWorld(){
+        for(int x = 0;x<lim_x;x++){
+            for(int y = 0;y<lim_x;y++){
+                world[x][y]=0;
+            }
+        }
+        anyAntOutOfBounds = false;
+        ants.clear();
+        num_black = 0;
+    }
+    public void randomInit(double porcenBlack,int numAnts){
+        resetWorld();
+        porcenBlack *=0.01;
+        for(int x = 0;x<lim_x;x++){
+            for(int y = 0;y<lim_x;y++){
+                if(Math.random()<=porcenBlack){
+                    world[x][y]++;
+                    num_black++;
+                }
+            }
+        }
+        for(int i = 0;i<numAnts;i++){
+            createRandomAnt();
+        }
+    }
+    private void createRandomAnt(){
+        int randX = (int)(Math.random()*lim_x);
+        int randY = (int)(Math.random()*lim_y);
+        double aux_ori = Math.random();
+        char randOri;
+        if(aux_ori<0.25){
+            randOri = 'U';
+        }else if(aux_ori<0.5){
+            randOri = 'D';
+        }else if(aux_ori<0.75){
+            randOri = 'R';
+        }else{
+            randOri = 'L';
+        }
+        
+        addAnt(randX,randY,randOri,world[randX][randY]);
+    }
 }

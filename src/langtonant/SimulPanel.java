@@ -84,4 +84,25 @@ public class SimulPanel extends JPanel{
     public boolean linesColorGray(){
         return linesColor.equals(Gray);
     }
+    public void resetWorldWin(){
+        simDraw.setColor(Color.WHITE);
+        simDraw.fillRect(0, 0, x_dim-1, y_dim-1);
+    }
+    public void setWorldCells(World w){
+        for(int x=0;x<num_celdas;x++){
+            for(int y=0;y<num_celdas;y++){
+                if(w.world[x][y]==0){
+                    simDraw.setColor(Color.WHITE);
+                }
+                else{
+                    simDraw.setColor(Color.BLACK);
+                }
+                simDraw.fillRect(x*(cell_size+1),y*(cell_size+1), 4,4);
+            }
+        }
+        simDraw.setColor(Color.RED);
+        for(Ant a: w.ants){
+                simDraw.fillRect(a.getX()*(cell_size+1),a.getY()*(cell_size+1), 4,4);
+        }
+    }
 }

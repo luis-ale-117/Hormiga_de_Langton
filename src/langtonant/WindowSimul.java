@@ -51,6 +51,8 @@ public class WindowSimul extends JFrame{
     public BufferedImage worldImg;
     public Graphics worldDraw;
     
+    private int generation;
+    
     public WindowSimul(int dimension,int barraTools){
         this.setSize(dimension+barraTools,dimension);
         this.setLocationRelativeTo(null);
@@ -112,6 +114,18 @@ public class WindowSimul extends JFrame{
                 showGraphicsWin();
             }
         });
+        tool.reset.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetSim();
+            }
+        });
+        tool.random.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                randomSim();
+            }
+        });
         
         running = false;
         place_ant = false;
@@ -125,6 +139,8 @@ public class WindowSimul extends JFrame{
         world = new World(NUM_CELDAS);
         worldImg = new BufferedImage(DIM_SIMUL_IMG,DIM_SIMUL_IMG,BufferedImage.TYPE_INT_RGB);
         worldDraw = worldImg.createGraphics();
+        
+        generation =0;
     }
     
     public void initWorld(){
@@ -135,14 +151,13 @@ public class WindowSimul extends JFrame{
     }
     
     public void startSimulation(){
-        int generation = 0;
         while(true){
             /*PINTA LAS HORMIGAS*/
             for(Ant a: world.ants){
                 worldDraw.setColor(Color.RED);
                 worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
             }
-            gr.updateGraphs(generation, world.getNumBlack());
+            //gr.updateGraphs(generation, world.getNumBlack());
             /*EN PAUSA*/
             while(!running){
                 sim_view.muestraMundo();
@@ -156,7 +171,7 @@ public class WindowSimul extends JFrame{
             sim_view.muestraMundo();
             tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
             try {
-                Thread.sleep(1);
+                Thread.sleep(5);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -247,6 +262,23 @@ public class WindowSimul extends JFrame{
                 temp_ant.setOri('D');
         }
     }
+    private void resetSim(){
+        running = false;
+        world.resetWorld();
+        sim_view.resetWorldWin();
+        generation = 0;
+        tool.actualizaDatos(0,0,0);
+        tool.start_sim.setEnabled(false);
+    }
+    private void randomSim(){
+        running = false;
+        world.randomInit(0.10, 5);
+        sim_view.setWorldCells(world);
+        generation = 0;
+        tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
+        tool.start_sim.setEnabled(true);
+    }
+    
     private void showGraphicsWin(){
         gr.setVisible(true);
     }

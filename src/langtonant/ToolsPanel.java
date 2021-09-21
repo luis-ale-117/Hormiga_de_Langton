@@ -11,8 +11,8 @@ public class ToolsPanel extends JPanel{
     
     public int celTotales;
     public JLabel generacion,celdas_negras,hormigas;
-    public JButton start_sim,zoom_out,zoom_in, new_ant,graph;
-    public JComboBox hormiga_orientacion;
+    public JButton start_sim,zoom_out,zoom_in, new_ant,graph,reset,random;
+    //public JComboBox hormiga_orientacion;
     
     ToolsPanel(int dimensionSimul, int dimenTool){
         super();
@@ -62,23 +62,21 @@ public class ToolsPanel extends JPanel{
         this.add(zoom_in);
         
         graph = new JButton("Graficas");
-        graph.setBounds(5, 155, 120, 30);
+        graph.setBounds(5, 155, 90, 30);
         this.add(graph);
-        /*
-        porcentajeSanas = new JLabel("%Sanas: ");
-        porcentajeSanas.setBounds(5, 186, 120, 30);
-        this.add(porcentajeSanas);
-        */
+        
+        reset = new JButton("Reset");
+        reset.setBounds(100, 155, 80, 30);
+        this.add(reset);
+        
+        random = new JButton("Random");
+        random.setBounds(5, 186, 90, 30);
+        this.add(random);
     }
     
     public void actualizaDatos(int gen,int cant_negras, int cant_hormigas){
         generacion.setText("Generacion: "+gen);
         celdas_negras.setText("Celdas negras: "+cant_negras);
         hormigas.setText("Hormigas: "+cant_hormigas);
-        /*infecB.setText("Tipo B: "+tipB);
-        muertas.setText("Muertas: "+muert);
-        sanas.setText("Sanas: "+sana);
-        porcentajeSanas.setText("%Sanas: "+(sana*100.0/celTotales));
-        */
     }
 }
