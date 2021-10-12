@@ -3,6 +3,7 @@ package langtonant;
 
 import java.awt.Color;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -16,6 +17,9 @@ public class GraphicsWindow extends JFrame{
     XYSeriesCollection black_cell_series,log_black_cell_series;
     JFreeChart black_cells_graph,log_black_cells_graph;
     ChartPanel bc_chart,log_bc_chart;
+    
+    JLabel media_label;
+    double media;
     
     GraphicsWindow(){
         super();
@@ -44,11 +48,19 @@ public class GraphicsWindow extends JFrame{
         log_bc_chart = new ChartPanel(log_black_cells_graph);
         log_bc_chart.setBounds(0, 305, 400, 300);
         add(log_bc_chart);
+        
+        media_label = new JLabel("Media: 0");
+        media_label.setBounds(405, 0, 150, 30);
+        add(media_label);
+        media = 0;
     }
-    public void updateGraphs(int generation, int num_black){
+    public void updateGraphs(int generation, int num_black, boolean show){
+        if (show==false) return;
         data_black_cells.add(generation, num_black);
         if(Math.log10(num_black)<0)
             log_data_black_cells.add(generation,0.1);
         else log_data_black_cells.add(generation,Math.log10(num_black));
+        media += ((num_black + media)/(generation*num_black))*num_black;
+        media_label.setText("Media: "+media);
     }
 }

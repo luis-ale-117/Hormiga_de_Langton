@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 
 public class WindowSimul extends JFrame{
@@ -31,6 +33,7 @@ public class WindowSimul extends JFrame{
     private static final byte POS_WHITE=0;
     private static final byte POS_BLACK=1;
     private static final String[] ORIENTACIONES={"Derecha","Izquierda","Arriba","Abajo"};
+    private static final String[] WORLD_TYPES={"Toroidal","Finito"};
     
     private static int DIM_SIMUL_IMG=DIM_CELDA*NUM_CELDAS+NUM_CELDAS-1;
     
@@ -40,7 +43,7 @@ public class WindowSimul extends JFrame{
     public GraphicsWindow gr;
     
     /*FLAGS*/
-    public boolean running,place_ant;
+    public boolean running,place_ant,graphs_updating;
     public Ant temp_ant;
     public int temp_ant_x,temp_ant_y;
     public byte temp_ant_color;
@@ -78,7 +81,6 @@ public class WindowSimul extends JFrame{
         
         
         gr =  new GraphicsWindow();
-        gr.setVisible(true);
         
         tool.start_sim.addActionListener(new ActionListener(){
             @Override
@@ -129,6 +131,7 @@ public class WindowSimul extends JFrame{
         
         running = false;
         place_ant = false;
+        graphs_updating = false;
         
         temp_ant = null;
         temp_ant_x = 0;
@@ -151,46 +154,87 @@ public class WindowSimul extends JFrame{
     }
     
     public void startSimulation(){
+        chooseKindOfWorld();
         while(true){
             /*PINTA LAS HORMIGAS*/
-            for(Ant a: world.ants){
-                worldDraw.setColor(Color.RED);
-                worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
-            }
-            //gr.updateGraphs(generation, world.getNumBlack());
-            /*EN PAUSA*/
-            while(!running){
-                sim_view.muestraMundo();
-                try {
-                    Thread.sleep(30);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            paintAnts();
+            gr.updateGraphs(generation, world.getNumBlack(),graphs_updating);
+            /*EN PAUSA SI LO ESTA*/
+            ifSimPaused();
             world.updateAntsPos();
             sim_view.muestraMundo();
             tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
             try {
-                Thread.sleep(5);
+                Thread.sleep(30);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
             /*PINTA LAS CELDAS DONDE ESTUVIERON LAS HORMIGAS*/
-            for(Ant a: world.ants){
-                if(world.world[a.getX_antes()][a.getY_antes()]==POS_WHITE)
-                    worldDraw.setColor(Color.WHITE);
-                else
-                    worldDraw.setColor(Color.BLACK);
-                worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
-            }
-            if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite()){
-                sim_view.paintLinesGray();
-            }
-            if(DIM_SIMUL_IMG < 5000 && sim_view.linesColorGray()){
-                sim_view.paintLinesWhite();
-            }
-            
+            paintCellsAndLines();
+            ifSimEnded();
             generation++;
+        }
+    }
+    
+    private void paintCellsAndLines(){
+        for(Ant a: world.ants){
+            if(world.world[a.getX_antes()][a.getY_antes()]==POS_WHITE)
+                worldDraw.setColor(Color.WHITE);
+            else
+                worldDraw.setColor(Color.BLACK);
+            worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
+        }
+        paintLinesIfNeeded();
+    }
+    private void paintLinesIfNeeded(){
+        if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite()){
+            sim_view.paintLinesGray();
+        }
+        if(DIM_SIMUL_IMG < 5000 && sim_view.linesColorGray()){
+            sim_view.paintLinesWhite();
+        }
+    }
+    private void paintAnts(){
+        for(Ant a: world.ants){
+            worldDraw.setColor(Color.RED);
+            worldDraw.fillRect(a.getX()*(DIM_CELDA+1),a.getY()*(DIM_CELDA+1), 4,4);
+        }
+    }
+    private void ifSimPaused(){
+        while(!running){
+            sim_view.muestraMundo();
+            paintLinesIfNeeded();
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    private void ifSimEnded(){
+        if(world.antsOutBounds() && !world.isToroidal()){
+            JOptionPane.showMessageDialog(this,
+            "Simulación finalizada porque una o más hormigas llegaron\na los límites del mundo establecido. Inicie otra.",
+            "Fin de la simulación",
+            JOptionPane.WARNING_MESSAGE);
+            running = false;
+            tool.start_sim.setText("Sigue");
+            tool.start_sim.setEnabled(false);
+            
+            tool.new_ant.setEnabled(false);
+            ifSimPaused();
+        }
+    }
+    
+    private void chooseKindOfWorld(){
+        String worldKind = (String)JOptionPane.showInputDialog(this, "Escoge un tipo de mundo para la simulación",
+                "Mundo", JOptionPane.QUESTION_MESSAGE, null, WORLD_TYPES, WORLD_TYPES[0]);
+        if(worldKind != null){
+            if(worldKind=="Toroidal")
+                world.setToroidalWorld(true);
+            else
+                world.setToroidalWorld(false);
         }
     }
     
@@ -265,21 +309,38 @@ public class WindowSimul extends JFrame{
     private void resetSim(){
         running = false;
         world.resetWorld();
-        sim_view.resetWorldWin();
+        sim_view.setWorldCells(world);
         generation = 0;
         tool.actualizaDatos(0,0,0);
         tool.start_sim.setEnabled(false);
+        tool.new_ant.setEnabled(true);
     }
     private void randomSim(){
+        SpinnerNumberModel sModel1 = new SpinnerNumberModel(1, 1, 100, 1);
+        JSpinner spinner1 = new JSpinner(sModel1);
+        int option1 = JOptionPane.showOptionDialog(this, spinner1, "Cantidad de Hormigas", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option1 == JOptionPane.CANCEL_OPTION){
+            return;
+        }
+        
+        SpinnerNumberModel sModel2 = new SpinnerNumberModel(0, 0, 100, 0.1);
+        JSpinner spinner2 = new JSpinner(sModel2);
+        int option2 = JOptionPane.showOptionDialog(this, spinner2, "Porcentaje casillas negras", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option2 == JOptionPane.CANCEL_OPTION){
+            return;
+        }
+
         running = false;
-        world.randomInit(0.10, 5);
+        world.randomInit((double)spinner2.getValue(), (int)spinner1.getValue());
         sim_view.setWorldCells(world);
         generation = 0;
         tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
         tool.start_sim.setEnabled(true);
+        tool.new_ant.setEnabled(true);
     }
     
     private void showGraphicsWin(){
-        gr.setVisible(true);
+        gr.setVisible(!gr.isVisible());
+        graphs_updating = gr.isVisible();
     }
 }

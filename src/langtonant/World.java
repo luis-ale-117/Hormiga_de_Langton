@@ -35,22 +35,21 @@ public class World {
     public void addAnt(Ant a){
         ants.add(a);
     }
+    public void setToroidalWorld(boolean tor){
+        toroidal=tor;
+    }
     public boolean isToroidal(){
         return toroidal;
     }
     public void turnAnts(){
-        for(Ant ant: ants)
+        ants.forEach(ant -> {
             ant.gira(world[ant.getX()][ant.getY()]);
-    }
-    public void moveAnts(){
-        for(Ant ant: ants){
-            ant.avanza();
-            anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
-        }
+        });
     }
     public void updateAntsPos(){
         for(Ant ant: ants){
             ant.gira(world[ant.getX()][ant.getY()]);
+            /*Where it is the ant, update color*/
             if(world[ant.getX()][ant.getY()] == ant.color_actual){
                 world[ant.getX()][ant.getY()] = ant.color_siguiente;
                 if(ant.color_siguiente == POS_BLACK){
@@ -59,11 +58,23 @@ public class World {
                     num_black--;
                 }
             }
+            /*Ant moves*/
             ant.avanza();
-            //anyAntOutOfBounds = anyAntOutOfBounds || ant.isOutOfLimits();
-            
-            ant.setColorActual(world[ant.getX()][ant.getY()]);
+            /*Ant updates its current position color*/
+            try {
+                ant.setColorActual(world[ant.getX()][ant.getY()]);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                if(isToroidal()){
+                    ant.posInToroidal();
+                    ant.setColorActual(world[ant.getX()][ant.getY()]);
+                }else{
+                    anyAntOutOfBounds = true;
+                }
+            }
         }
+    }
+    public boolean antsOutBounds(){
+        return anyAntOutOfBounds;
     }
     public void changeAntsCellsState(){
         for(Ant ant: ants){
@@ -93,13 +104,18 @@ public class World {
         num_black = 0;
     }
     public void randomInit(double porcenBlack,int numAnts){
-        resetWorld();
+        //resetWorld();
+        anyAntOutOfBounds = false;
+        ants.clear();
+        num_black = 0;
         porcenBlack *=0.01;
         for(int x = 0;x<lim_x;x++){
             for(int y = 0;y<lim_x;y++){
                 if(Math.random()<=porcenBlack){
-                    world[x][y]++;
+                    world[x][y]=(byte)1;
                     num_black++;
+                }else{
+                    world[x][y]=(byte)0;
                 }
             }
         }
