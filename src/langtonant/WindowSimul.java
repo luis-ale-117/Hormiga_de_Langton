@@ -24,6 +24,7 @@ public class WindowSimul extends JFrame{
     
     private static final int NUM_CELDAS=1000;
     private static final int DIM_CELDA = 5;
+    private static final int DEFAULT_DS=DIM_CELDA*NUM_CELDAS+NUM_CELDAS-1;
     
     private static final int RGB_RED=0xFF0000;
     private static final int RGB_WHITE=0xFFFFFF;
@@ -304,6 +305,15 @@ public class WindowSimul extends JFrame{
                 temp_ant.setOri('U');
             else
                 temp_ant.setOri('D');
+            
+            if(DIM_SIMUL_IMG != 5999){
+                DIM_SIMUL_IMG = DEFAULT_DS;
+                sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
+                scrollpanel.setViewportView(sim_view);
+            }
+            if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
+                    sim_view.paintLinesGray();
+            }
         }
     }
     private void resetSim(){

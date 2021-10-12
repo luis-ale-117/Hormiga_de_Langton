@@ -23,7 +23,7 @@ public class World {
         world = new byte[celdas][celdas];
         lim_x = celdas;
         lim_y = celdas;
-        ants = new ArrayList<Ant>();
+        ants = new ArrayList<Ant>(100);
         num_black = 0;
     }
     public void addAnt(){
