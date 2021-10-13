@@ -71,6 +71,7 @@ public class WindowSimul extends JFrame{
         sim_view.addMouseListener(new MouseAdapter(){
             public void mouseClicked(MouseEvent e){
                 placeAnt(e);
+                changeCell(e);
             }
         });
         scrollpanel = new JScrollPane(sim_view);
@@ -80,55 +81,8 @@ public class WindowSimul extends JFrame{
         tool = new ToolsPanel(DIM_VENTANA-50,DIM_TOOLS+50);
         this.add(tool);
         
-        
         gr =  new GraphicsWindow();
-        
-        tool.start_sim.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                start_button();
-            }
-        });
-        
-        tool.new_ant.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createAnt();
-            }
-        });
-        
-        tool.zoom_out.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomOut();
-            }
-        });
-        
-        tool.zoom_in.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomIn();
-            }
-        });
-        
-        tool.graph.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showGraphicsWin();
-            }
-        });
-        tool.reset.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                resetSim();
-            }
-        });
-        tool.random.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                randomSim();
-            }
-        });
+        setButtonsActions();
         
         running = false;
         place_ant = false;
@@ -144,7 +98,7 @@ public class WindowSimul extends JFrame{
         worldImg = new BufferedImage(DIM_SIMUL_IMG,DIM_SIMUL_IMG,BufferedImage.TYPE_INT_RGB);
         worldDraw = worldImg.createGraphics();
         
-        generation =0;
+        generation = 0;
     }
     
     public void initWorld(){
@@ -204,7 +158,7 @@ public class WindowSimul extends JFrame{
     private void ifSimPaused(){
         while(!running){
             sim_view.muestraMundo();
-            paintLinesIfNeeded();
+            //paintLinesIfNeeded();
             try {
                 Thread.sleep(30);
             } catch (InterruptedException ex) {
@@ -238,14 +192,73 @@ public class WindowSimul extends JFrame{
                 world.setToroidalWorld(false);
         }
     }
+    private void setButtonsActions(){
+        tool.start_sim.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                start_button();
+            }
+        });
+        
+        tool.new_ant.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createAnt();
+            }
+        });
+        
+        tool.zoom_out.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                zoomOut();
+            }
+        });
+        
+        tool.zoom_in.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                zoomIn();
+            }
+        });
+        
+        tool.graph.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showGraphicsWin();
+            }
+        });
+        tool.reset.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetSim();
+            }
+        });
+        tool.random.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                randomSim();
+            }
+        });
+        
+        tool.edit_cell.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editCellValue();
+            }
+        });
+    }
     
     private void start_button(){
         running = !running;
         if(running){
             tool.start_sim.setText("Pausa");
+            tool.new_ant.setEnabled(false);
+            tool.edit_cell.setEnabled(false);
         }
         else{
             tool.start_sim.setText("Sigue");
+            tool.new_ant.setEnabled(true);
+            tool.edit_cell.setEnabled(true);
         }
     }
     /*Falta borrar hormiga de la imagen si se da clic en otro lado, ie suponemos un solo clic*/
@@ -262,9 +275,9 @@ public class WindowSimul extends JFrame{
             worldDraw.setColor(Color.RED);
             worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga
             world.addAnt(temp_ant);//Agregamos la hormiga al mundo
+            place_ant = false;
+            tool.start_sim.setEnabled(true);
         }
-        place_ant = false;
-        tool.start_sim.setEnabled(true);
     }
     private void zoomOut(){
         if(DIM_SIMUL_IMG > 1000){
@@ -352,5 +365,44 @@ public class WindowSimul extends JFrame{
     private void showGraphicsWin(){
         gr.setVisible(!gr.isVisible());
         graphs_updating = gr.isVisible();
+    }
+    
+    private void editCellValue(){
+        if(tool.edit_cell.isSelected()){
+            JOptionPane.showMessageDialog(null,
+                "Con clic izquierdo y derecho cambie los estados como sigue:"
+                        + "\n1.- Clic izquierdo: Hormiga gira 90° a la derecha (Negro por default)"
+                        + "\n2.- Clic derecho: Hormiga gira 90° a la izquierda (Blanco por default)",
+                "Configuración de colores",
+                JOptionPane.WARNING_MESSAGE);
+            running = false;
+            tool.start_sim.setText("Sigue");
+            tool.start_sim.setEnabled(false);
+            tool.new_ant.setEnabled(false);
+        }else{
+            tool.new_ant.setEnabled(true);
+            tool.start_sim.setEnabled(true);
+        }
+        
+    }
+    private void changeCell(MouseEvent e){
+        if(tool.edit_cell.isSelected()){
+            int pos_x,pos_y;
+            pos_x = ((int)e.getX())/(DIM_CELDA+1);
+            pos_y = ((int)e.getY())/(DIM_CELDA+1);
+            if(e.getButton()==MouseEvent.BUTTON1){//Izquierdo
+                world.setPosColor(pos_x,pos_y,POS_BLACK);
+                worldDraw.setColor(Color.BLACK);
+                worldDraw.fillRect(pos_x*(DIM_CELDA+1),pos_y*(DIM_CELDA+1), 4,4);
+            }else if(e.getButton()==MouseEvent.BUTTON3){
+                world.setPosColor(pos_x,pos_y,POS_WHITE);
+                worldDraw.setColor(Color.WHITE);
+                worldDraw.fillRect(pos_x*(DIM_CELDA+1),pos_y*(DIM_CELDA+1), 4,4);
+            }else{
+            }
+        }else{
+            
+        }
+        
     }
 }

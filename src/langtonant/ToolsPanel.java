@@ -6,12 +6,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 public class ToolsPanel extends JPanel{
     
     public int celTotales;
     public JLabel generacion,celdas_negras,hormigas;
     public JButton start_sim,zoom_out,zoom_in, new_ant,graph,reset,random;
+    public JToggleButton edit_cell;
     //public JComboBox hormiga_orientacion;
     
     ToolsPanel(int dimensionSimul, int dimenTool){
@@ -72,6 +74,10 @@ public class ToolsPanel extends JPanel{
         random = new JButton("Random");
         random.setBounds(5, 186, 90, 30);
         this.add(random);
+        
+        edit_cell = new JToggleButton("Edit");
+        edit_cell.setBounds(5, 217, 90, 30);
+        this.add(edit_cell);
     }
     
     public void actualizaDatos(int gen,int cant_negras, int cant_hormigas){

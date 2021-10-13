@@ -76,17 +76,27 @@ public class World {
     public boolean antsOutBounds(){
         return anyAntOutOfBounds;
     }
-    public void changeAntsCellsState(){
-        for(Ant ant: ants){
-            if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
-                world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
-            }
-        }
-    }
+//    public void changeAntsCellsState(){
+//        for(Ant ant: ants){
+//            if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
+//                world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
+//            }
+//        }
+//    }
     public byte getPosColor(int x, int y){
         return world[x][y];
     }
-    
+    public void setPosColor(int x, int y, byte col){
+        byte color_anterior = (byte)world[x][y];
+        world[x][y] = col;
+        if(color_anterior!=col){
+            if(col == POS_WHITE){
+                num_black--;
+            }else{
+                num_black++;
+            }
+        }
+    }
     public int getNumAnts(){
         return ants.size();
     }
