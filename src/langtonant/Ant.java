@@ -1,6 +1,8 @@
 
 package langtonant;
 
+import java.awt.Color;
+
 public class Ant {
     private static final byte POS_WHITE=0;
     private static final byte POS_BLACK=1;
@@ -9,8 +11,9 @@ public class Ant {
     public int[] pos_anterior = new int[2];
     public byte color_siguiente,color_actual;
     public char orientacion;
-    private int limit_x;
-    private int limit_y;
+    private static int limit_x;
+    private static int limit_y;
+    public Color neg_90_der,bla_90_izq;
     
     Ant(){
         pos_actual[0]=10;//x
@@ -22,6 +25,8 @@ public class Ant {
         color_siguiente = 1;
         limit_x = 1000;
         limit_y = 1000;
+        neg_90_der = Color.BLACK;
+        bla_90_izq = Color.WHITE;
     }
     Ant(int lim_x, int lim_y){
         pos_actual[0]=0;//x
@@ -47,24 +52,25 @@ public class Ant {
         limit_y = lim_y;
     }
     
-    public void gira(int color){
+    public void gira(int c){
+        int color= this.color_actual;
         if(color==POS_WHITE){//Blanco
-            if(orientacion=='U'){
-                orientacion='L';
-            }else if(orientacion=='L'){
-                orientacion = 'D';
-            }else if(orientacion=='D'){
-                orientacion = 'R';
-            }else{
-                orientacion = 'U';
-            }
-        }else{
             if(orientacion=='U'){
                 orientacion='R';
             }else if(orientacion=='R'){
                 orientacion = 'D';
             }else if(orientacion=='D'){
                 orientacion = 'L';
+            }else{
+                orientacion = 'U';
+            }
+        }else{
+            if(orientacion=='U'){
+                orientacion='L';
+            }else if(orientacion=='L'){
+                orientacion = 'D';
+            }else if(orientacion=='D'){
+                orientacion = 'R';
             }else{
                 orientacion = 'U';
             }
@@ -130,5 +136,11 @@ public class Ant {
     }
     public boolean isOutOfLimits(){
         return pos_actual[0]>= limit_x || pos_actual[1]>=limit_y||pos_actual[0]<0||pos_actual[1]<0;
+    }
+    public void setNeg90der(Color neg90){
+        neg_90_der = neg90;
+    }
+    public void setBla90izq(Color bla90){
+        bla_90_izq = bla90;
     }
 }

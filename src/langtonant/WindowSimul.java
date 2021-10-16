@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JColorChooser;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -50,12 +51,14 @@ public class WindowSimul extends JFrame{
     public byte temp_ant_color;
     public char temp_ant_ori;
     public String ori_new_ant;
+    public Color temp_ant_neg90;
+    public Color temp_ant_bla90;
     
     public World world;
     public BufferedImage worldImg;
     public Graphics worldDraw;
     
-    private int generation;
+    private int generation,gen_calculos;
     
     public WindowSimul(int dimension,int barraTools){
         this.setSize(dimension+barraTools,dimension);
@@ -99,6 +102,7 @@ public class WindowSimul extends JFrame{
         worldDraw = worldImg.createGraphics();
         
         generation = 0;
+        gen_calculos=0;
     }
     
     public void initWorld(){
@@ -113,14 +117,14 @@ public class WindowSimul extends JFrame{
         while(true){
             /*PINTA LAS HORMIGAS*/
             paintAnts();
-            gr.updateGraphs(generation, world.getNumBlack(),graphs_updating);
+            gr.updateGraphs(gen_calculos, world.getNumBlack(),graphs_updating);
             /*EN PAUSA SI LO ESTA*/
             ifSimPaused();
             world.updateAntsPos();
             sim_view.muestraMundo();
             tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
             try {
-                Thread.sleep(30);
+                Thread.sleep(0);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -128,15 +132,20 @@ public class WindowSimul extends JFrame{
             paintCellsAndLines();
             ifSimEnded();
             generation++;
+            if(graphs_updating){
+                gen_calculos++;
+            }
         }
     }
     
     private void paintCellsAndLines(){
         for(Ant a: world.ants){
             if(world.world[a.getX_antes()][a.getY_antes()]==POS_WHITE)
-                worldDraw.setColor(Color.WHITE);
+                //worldDraw.setColor(Color.WHITE);
+                worldDraw.setColor(a.bla_90_izq);
             else
-                worldDraw.setColor(Color.BLACK);
+                //worldDraw.setColor(Color.BLACK);
+                worldDraw.setColor(a.neg_90_der);
             worldDraw.fillRect(a.getX_antes()*(DIM_CELDA+1),a.getY_antes()*(DIM_CELDA+1), 4,4);
         }
         paintLinesIfNeeded();
@@ -264,13 +273,13 @@ public class WindowSimul extends JFrame{
     /*Falta borrar hormiga de la imagen si se da clic en otro lado, ie suponemos un solo clic*/
     private void placeAnt(MouseEvent e){
         if(place_ant){
-            tool.start_sim.setEnabled(true);
-            
             temp_ant_x = ((int)e.getX())/(DIM_CELDA+1);
             temp_ant_y = ((int)e.getY())/(DIM_CELDA+1);
             temp_ant_color = world.getPosColor(temp_ant_x, temp_ant_y);
             temp_ant.setPos(temp_ant_x, temp_ant_y);
             temp_ant.setColorActual(temp_ant_color);
+            temp_ant.setNeg90der(temp_ant_neg90);
+            temp_ant.setBla90izq(temp_ant_bla90);
             
             worldDraw.setColor(Color.RED);
             worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga
@@ -303,12 +312,36 @@ public class WindowSimul extends JFrame{
     private void createAnt(){
         ori_new_ant = (String)JOptionPane.showInputDialog(this, "Agrega una orientacion para la nueva hormiga.\nPosteormente da click en su posición",
                 "Nueva hormiga", JOptionPane.QUESTION_MESSAGE, null, ORIENTACIONES, ORIENTACIONES[0]);
+        JColorChooser neg90 = new JColorChooser(Color.BLACK);//Black by default
+        int option1 = JOptionPane.showOptionDialog(null, neg90, "Color de celda si es Negra, (Negro default)", JOptionPane.CLOSED_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option1 == JOptionPane.CLOSED_OPTION){
+            return;
+        }
+        JColorChooser bla90 = new JColorChooser(Color.WHITE);//White by default
+        int option2 = JOptionPane.showOptionDialog(null, bla90, "Color de celda si es Blanca, (Blanca default)", JOptionPane.CLOSED_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option2 == JOptionPane.CLOSED_OPTION){
+            return;
+        }
+        
+        SpinnerNumberModel sModel1 = new SpinnerNumberModel(0, 0, 999, 1);
+        SpinnerNumberModel sModel2 = new SpinnerNumberModel(0, 0, 999, 1);
+        JSpinner spinnerX = new JSpinner(sModel1);
+        JSpinner spinnerY = new JSpinner(sModel2);
+        Object[] ob= new Object[5];
+        ob[0] = "¿Desea ingresar una posicion sin mouse?";
+        ob[1] = "Posicion en X";
+        ob[2] = spinnerX;
+        ob[3] = "Posicion en Y";
+        ob[4] = spinnerY;
+        int op = JOptionPane.showOptionDialog(null, ob, "Posicion de la Hormiga", JOptionPane.OK_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        
         if(ori_new_ant != null){
+            //Deten la simulacion
             place_ant = true;
             running = false;
             tool.start_sim.setText("Sigue");
             tool.start_sim.setEnabled(false);
-            
+            //Valores temporales de la hormiga
             temp_ant = new Ant(NUM_CELDAS,NUM_CELDAS);
             if(ori_new_ant=="Derecha")
                 temp_ant.setOri('R');
@@ -318,7 +351,25 @@ public class WindowSimul extends JFrame{
                 temp_ant.setOri('U');
             else
                 temp_ant.setOri('D');
-            
+            temp_ant_neg90 = neg90.getColor();
+            temp_ant_bla90 = bla90.getColor();
+            if (op == JOptionPane.OK_OPTION){
+                place_ant = false;
+                tool.start_sim.setEnabled(true);
+                
+                temp_ant_x = (int)spinnerX.getValue();
+                temp_ant_y = (int)spinnerY.getValue();
+                temp_ant_color = world.getPosColor(temp_ant_x, temp_ant_y);
+                temp_ant.setPos(temp_ant_x, temp_ant_y);
+                temp_ant.setColorActual(temp_ant_color);
+                temp_ant.setNeg90der(temp_ant_neg90);
+                temp_ant.setBla90izq(temp_ant_bla90);
+
+                worldDraw.setColor(Color.RED);
+                worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga
+                world.addAnt(temp_ant);//Agregamos la hormiga al mundo
+            }
+            //Pon el zoom por default
             if(DIM_SIMUL_IMG != 5999){
                 DIM_SIMUL_IMG = DEFAULT_DS;
                 sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
@@ -335,11 +386,21 @@ public class WindowSimul extends JFrame{
         sim_view.setWorldCells(world);
         generation = 0;
         tool.actualizaDatos(0,0,0);
+        gr.clearGraphics();
         tool.start_sim.setEnabled(false);
         tool.new_ant.setEnabled(true);
+        chooseKindOfWorld();
+        if(DIM_SIMUL_IMG != 5999){
+            DIM_SIMUL_IMG = DEFAULT_DS;
+            sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
+            scrollpanel.setViewportView(sim_view);
+        }
+        if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
+                sim_view.paintLinesGray();
+        }
     }
     private void randomSim(){
-        SpinnerNumberModel sModel1 = new SpinnerNumberModel(1, 1, 100, 1);
+        SpinnerNumberModel sModel1 = new SpinnerNumberModel(0, 0, 100, 1);
         JSpinner spinner1 = new JSpinner(sModel1);
         int option1 = JOptionPane.showOptionDialog(this, spinner1, "Cantidad de Hormigas", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
         if (option1 == JOptionPane.CANCEL_OPTION){

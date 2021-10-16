@@ -1,6 +1,7 @@
 
 package langtonant;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 public class World {
@@ -29,8 +30,10 @@ public class World {
     public void addAnt(){
         ants.add(new Ant(lim_x,lim_y));
     }
-    public void addAnt(int x, int y,char ori,byte color){
+    public void addAnt(int x, int y,char ori,byte color,Color neg,Color bla){
         ants.add(new Ant(x,y,ori,lim_x,lim_y,color));
+        ants.get(ants.size()-1).setBla90izq(bla);
+        ants.get(ants.size()-1).setNeg90der(neg);
     }
     public void addAnt(Ant a){
         ants.add(a);
@@ -76,13 +79,6 @@ public class World {
     public boolean antsOutBounds(){
         return anyAntOutOfBounds;
     }
-//    public void changeAntsCellsState(){
-//        for(Ant ant: ants){
-//            if(ant.color_siguiente != world[ant.getX_antes()][ant.getY_antes()]){
-//                world[ant.getX_antes()][ant.getY_antes()] = ant.color_siguiente;
-//            }
-//        }
-//    }
     public byte getPosColor(int x, int y){
         return world[x][y];
     }
@@ -147,7 +143,20 @@ public class World {
         }else{
             randOri = 'L';
         }
-        
-        addAnt(randX,randY,randOri,world[randX][randY]);
+        Color col_neg = getRandColorNeg();
+        Color col_bla = getRandColorBla();
+        addAnt(randX,randY,randOri,world[randX][randY],col_neg,col_bla);
+    }
+    private Color getRandColorBla(){//Mas claros
+        int R = (int)(Math.random()*128)+127;
+        int G = (int)(Math.random()*128)+127;
+        int B = (int)(Math.random()*128)+127;
+        return new Color(R,G,B);
+    }
+    private Color getRandColorNeg(){//Mas oscuros
+        int R = (int)(Math.random()*128);
+        int G = (int)(Math.random()*128);
+        int B = (int)(Math.random()*128);
+        return new Color(R,G,B);
     }
 }
