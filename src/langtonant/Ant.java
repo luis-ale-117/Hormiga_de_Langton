@@ -47,7 +47,7 @@ public class Ant {
         pos_anterior[1]=y;
         orientacion = ori;//L:left, R:right, U:up, D:down
         color_actual = color;
-        color_siguiente = color;
+        color_siguiente = color==POS_WHITE?POS_BLACK:POS_WHITE;
         limit_x = lim_x;
         limit_y = lim_y;
     }
@@ -142,5 +142,11 @@ public class Ant {
     }
     public void setBla90izq(Color bla90){
         bla_90_izq = bla90;
+    }
+    public int getNeg90_RGB(){
+        return neg_90_der.getRGB();
+    }
+    public int getBla90_RGB(){
+        return bla_90_izq.getRGB();
     }
 }

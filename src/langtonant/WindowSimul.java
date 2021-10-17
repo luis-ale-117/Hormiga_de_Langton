@@ -9,13 +9,28 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public class WindowSimul extends JFrame{
@@ -26,6 +41,19 @@ public class WindowSimul extends JFrame{
     private static final int NUM_CELDAS=1000;
     private static final int DIM_CELDA = 5;
     private static final int DEFAULT_DS=DIM_CELDA*NUM_CELDAS+NUM_CELDAS-1;
+    private static final int DIM_ZOOM_1N=DEFAULT_DS/2;
+    private static final int DIM_ZOOM_2N=DEFAULT_DS/4;
+    private static final int DIM_ZOOM_3N=645;
+    private static final int DIM_ZOOM_1P=DEFAULT_DS*3;
+    private static final int DIM_ZOOM_2P=DEFAULT_DS*4;
+    private static final int DIM_ZOOM_3P=DEFAULT_DS*5;
+    private static final int DEFAULT_SPEED=100;
+    private static final int SPEED_1N=500;
+    private static final int SPEED_2N=1000;
+    private static final int SPEED_3N=2000;
+    private static final int SPEED_1P=25;
+    private static final int SPEED_2P=1;
+    private static final int SPEED_3P=0;
     
     private static final int RGB_RED=0xFF0000;
     private static final int RGB_WHITE=0xFFFFFF;
@@ -38,11 +66,16 @@ public class WindowSimul extends JFrame{
     private static final String[] WORLD_TYPES={"Toroidal","Finito"};
     
     private static int DIM_SIMUL_IMG=DIM_CELDA*NUM_CELDAS+NUM_CELDAS-1;
+    private static int SPEED=DEFAULT_SPEED;
     
     private JScrollPane scrollpanel;
     public SimulPanel sim_view;
     public ToolsPanel tool;
     public GraphicsWindow gr;
+    
+    public JMenuBar barra_menu;
+    public JMenu archivo;
+    public JMenuItem abrir_arch,save_arch;
     
     /*FLAGS*/
     public boolean running,place_ant,graphs_updating;
@@ -61,7 +94,7 @@ public class WindowSimul extends JFrame{
     private int generation,gen_calculos;
     
     public WindowSimul(int dimension,int barraTools){
-        this.setSize(dimension+barraTools,dimension);
+        this.setSize(dimension+barraTools,dimension+13);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setTitle("Langton's ant simulation");
@@ -83,20 +116,36 @@ public class WindowSimul extends JFrame{
         this.add(scrollpanel);
         tool = new ToolsPanel(DIM_VENTANA-50,DIM_TOOLS+50);
         this.add(tool);
+        abrir_arch = new JMenuItem();
+        save_arch = new JMenuItem();
+        archivo =  new JMenu();
+        barra_menu = new JMenuBar();
+        
+        archivo.setText("Archivo");
+        abrir_arch.setText("Abrir archivo");
+        save_arch.setText("Guardar");
+        archivo.add(abrir_arch);
+        archivo.add(save_arch);
+        barra_menu.add(archivo);
+        this.setJMenuBar(barra_menu);
         
         gr =  new GraphicsWindow();
+        
         setButtonsActions();
         
+        /*INICIA LAS BANDERAS*/
         running = false;
         place_ant = false;
         graphs_updating = false;
         
+        /*HORMIGA TEMPORAL*/
         temp_ant = null;
         temp_ant_x = 0;
         temp_ant_y = 0;
         temp_ant_ori = 'U';
         temp_ant_color = POS_WHITE;
         
+        /*MUNDO DE LA SIMULACION*/
         world = new World(NUM_CELDAS);
         worldImg = new BufferedImage(DIM_SIMUL_IMG,DIM_SIMUL_IMG,BufferedImage.TYPE_INT_RGB);
         worldDraw = worldImg.createGraphics();
@@ -124,7 +173,7 @@ public class WindowSimul extends JFrame{
             sim_view.muestraMundo();
             tool.actualizaDatos(generation,world.getNumBlack(),world.getNumAnts());
             try {
-                Thread.sleep(0);
+                Thread.sleep(SPEED);
             } catch (InterruptedException ex) {
                 Logger.getLogger(LangtonAnt.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -140,7 +189,7 @@ public class WindowSimul extends JFrame{
     
     private void paintCellsAndLines(){
         for(Ant a: world.ants){
-            if(world.world[a.getX_antes()][a.getY_antes()]==POS_WHITE)
+            if(world.world[a.getY_antes()][a.getX_antes()]==POS_WHITE)
                 //worldDraw.setColor(Color.WHITE);
                 worldDraw.setColor(a.bla_90_izq);
             else
@@ -175,7 +224,6 @@ public class WindowSimul extends JFrame{
             }
         }
     }
-    
     private void ifSimEnded(){
         if(world.antsOutBounds() && !world.isToroidal()){
             JOptionPane.showMessageDialog(this,
@@ -190,7 +238,6 @@ public class WindowSimul extends JFrame{
             ifSimPaused();
         }
     }
-    
     private void chooseKindOfWorld(){
         String worldKind = (String)JOptionPane.showInputDialog(this, "Escoge un tipo de mundo para la simulación",
                 "Mundo", JOptionPane.QUESTION_MESSAGE, null, WORLD_TYPES, WORLD_TYPES[0]);
@@ -201,6 +248,7 @@ public class WindowSimul extends JFrame{
                 world.setToroidalWorld(false);
         }
     }
+    
     private void setButtonsActions(){
         tool.start_sim.addActionListener(new ActionListener(){
             @Override
@@ -208,28 +256,12 @@ public class WindowSimul extends JFrame{
                 start_button();
             }
         });
-        
         tool.new_ant.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 createAnt();
             }
         });
-        
-        tool.zoom_out.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomOut();
-            }
-        });
-        
-        tool.zoom_in.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomIn();
-            }
-        });
-        
         tool.graph.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -248,11 +280,34 @@ public class WindowSimul extends JFrame{
                 randomSim();
             }
         });
-        
         tool.edit_cell.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 editCellValue();
+            }
+        });
+        tool.zoom_sld.addChangeListener(new ChangeListener(){
+            @Override
+            public void stateChanged(ChangeEvent e){
+                zoomSimulation();
+            }
+        });
+        tool.vel_sld.addChangeListener(new ChangeListener(){
+            @Override
+            public void stateChanged(ChangeEvent e){
+                speedSimulation();
+            }
+        });
+        save_arch.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                saveFile();
+            }
+        });
+        abrir_arch.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                openFile();
             }
         });
     }
@@ -270,7 +325,6 @@ public class WindowSimul extends JFrame{
             tool.edit_cell.setEnabled(true);
         }
     }
-    /*Falta borrar hormiga de la imagen si se da clic en otro lado, ie suponemos un solo clic*/
     private void placeAnt(MouseEvent e){
         if(place_ant){
             temp_ant_x = ((int)e.getX())/(DIM_CELDA+1);
@@ -288,25 +342,97 @@ public class WindowSimul extends JFrame{
             tool.start_sim.setEnabled(true);
         }
     }
-    private void zoomOut(){
-        if(DIM_SIMUL_IMG > 1000){
-            DIM_SIMUL_IMG -= 400;
-            sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
-            scrollpanel.setViewportView(sim_view);
-        }
-        
-        if(DIM_SIMUL_IMG < 5000 && sim_view.linesColorGray() && !running){
-            sim_view.paintLinesWhite();
+    private void zoomSimulation(){
+        switch (tool.zoom_sld.getValue()){
+            case 0->{
+                sim_view.changeSize(DEFAULT_DS,DEFAULT_DS);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorWhite() && !running){
+                    sim_view.paintLinesGray();
+                }
+            }
+            case -1->{
+                sim_view.changeSize(DIM_ZOOM_1N,DIM_ZOOM_1N);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorGray() && !running){
+                    sim_view.paintLinesWhite();
+                }
+            }
+            case -2->{
+                sim_view.changeSize(DIM_ZOOM_2N,DIM_ZOOM_2N);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorGray() && !running){
+                    sim_view.paintLinesWhite();
+                }
+            }
+            case -3->{
+                sim_view.changeSize(DIM_ZOOM_3N,DIM_ZOOM_3N);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorGray() && !running){
+                    sim_view.paintLinesWhite();
+                }
+            }
+            case 1->{
+                sim_view.changeSize(DIM_ZOOM_1P,DIM_ZOOM_1P);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorWhite() && !running){
+                    sim_view.paintLinesGray();
+                }
+            }
+            case 2->{
+                sim_view.changeSize(DIM_ZOOM_2P,DIM_ZOOM_2P);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorWhite() && !running){
+                    sim_view.paintLinesGray();
+                }
+            }
+            case 3->{
+                sim_view.changeSize(DIM_ZOOM_3P,DIM_ZOOM_3P);
+                scrollpanel.setViewportView(sim_view);
+                if(sim_view.linesColorWhite() && !running){
+                    sim_view.paintLinesGray();
+                }
+            }
         }
     }
-    private void zoomIn(){
-        if(DIM_SIMUL_IMG < 18000){
-            DIM_SIMUL_IMG += 400;
-            sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
-            scrollpanel.setViewportView(sim_view);
-        }
-        if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
-                sim_view.paintLinesGray();
+    private void speedSimulation(){
+        boolean aux=running;
+        switch (tool.vel_sld.getValue()){
+            case 0->{
+                running = false;
+                SPEED=DEFAULT_SPEED;
+                running=aux;
+            }
+            case -1->{
+                running = false;
+                SPEED=SPEED_1N;
+                running=aux;
+            }
+            case -2->{
+                running = false;
+                SPEED=SPEED_2N;
+                running=aux;
+            }
+            case -3->{
+                running = false;
+                SPEED=SPEED_3N;
+                running=aux;
+            }
+            case 1->{
+                running = false;
+                SPEED=SPEED_1P;
+                running=aux;
+            }
+            case 2->{
+                running = false;
+                SPEED=SPEED_2P;
+                running=aux;
+            }
+            case 3->{
+                running = false;
+                SPEED=SPEED_3P;
+                running=aux;
+            }
         }
     }
     private void createAnt(){
@@ -368,15 +494,8 @@ public class WindowSimul extends JFrame{
                 worldDraw.setColor(Color.RED);
                 worldDraw.fillRect(temp_ant_x*(DIM_CELDA+1),temp_ant_y*(DIM_CELDA+1), 4,4);//Dibuja la hormiga
                 world.addAnt(temp_ant);//Agregamos la hormiga al mundo
-            }
-            //Pon el zoom por default
-            if(DIM_SIMUL_IMG != 5999){
-                DIM_SIMUL_IMG = DEFAULT_DS;
-                sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
-                scrollpanel.setViewportView(sim_view);
-            }
-            if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
-                    sim_view.paintLinesGray();
+            }else{
+                tool.zoom_sld.setValue(0);
             }
         }
     }
@@ -390,14 +509,9 @@ public class WindowSimul extends JFrame{
         tool.start_sim.setEnabled(false);
         tool.new_ant.setEnabled(true);
         chooseKindOfWorld();
-        if(DIM_SIMUL_IMG != 5999){
-            DIM_SIMUL_IMG = DEFAULT_DS;
-            sim_view.changeSize(DIM_SIMUL_IMG,DIM_SIMUL_IMG);
-            scrollpanel.setViewportView(sim_view);
-        }
-        if(DIM_SIMUL_IMG > 5000 && sim_view.linesColorWhite() && !running){
-                sim_view.paintLinesGray();
-        }
+//        if(tool.zoom_sld.getValue()<0){
+//            tool.zoom_sld.setValue(0);
+//        }
     }
     private void randomSim(){
         SpinnerNumberModel sModel1 = new SpinnerNumberModel(0, 0, 100, 1);
@@ -422,15 +536,13 @@ public class WindowSimul extends JFrame{
         tool.start_sim.setEnabled(true);
         tool.new_ant.setEnabled(true);
     }
-    
     private void showGraphicsWin(){
         gr.setVisible(!gr.isVisible());
         graphs_updating = gr.isVisible();
     }
-    
     private void editCellValue(){
         if(tool.edit_cell.isSelected()){
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(this,
                 "Con clic izquierdo y derecho cambie los estados como sigue:"
                         + "\n1.- Clic izquierdo: Hormiga gira 90° a la derecha (Negro por default)"
                         + "\n2.- Clic derecho: Hormiga gira 90° a la izquierda (Blanco por default)",
@@ -465,5 +577,137 @@ public class WindowSimul extends JFrame{
             
         }
         
+    }
+    private void saveFile(){
+        if(running) return;
+        JFileChooser selectorArch = new JFileChooser();
+        selectorArch.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivo de texto","txt");
+        selectorArch.setFileFilter(filter);
+        int respuesta = selectorArch.showSaveDialog(this);
+
+        if(respuesta == JFileChooser.APPROVE_OPTION){
+            File arch = selectorArch.getSelectedFile();
+            FileWriter arch_w = null;
+            PrintWriter arch_pr = null;
+            try {
+                arch_w = new FileWriter(arch);
+                arch_pr = new PrintWriter(arch_w);
+                char[] cs = new char[1000];
+                int i = 0;
+                for(byte[] fila: world.world){
+                    i=0;
+                    for(byte b: fila){
+                        cs[i] = b==0?'.':'*';
+                        i++;
+                    }
+                    arch_w.write(cs);
+                    arch_w.write('\n');
+                }
+                arch_pr.println(generation-1);
+                arch_pr.println(world.ants.size());
+                for(Ant a: world.ants){
+                    arch_pr.println(a.getX());
+                    arch_pr.println(a.getY());
+                    arch_pr.println(a.orientacion);
+                    arch_pr.println(a.color_actual);
+                    arch_pr.println(a.getNeg90_RGB());
+                    arch_pr.println(a.getBla90_RGB());
+                    arch_pr.println();
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this,
+                "Error al intentar abrir el archvio\nError: "+ex,
+                "Error en Archivo",
+                JOptionPane.ERROR_MESSAGE);
+            } finally {
+                try {
+                    arch_pr.close();
+                    arch_w.close();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this,
+                    "Error al intentar cerrar el archvio\nError: "+ex,
+                    "Error en Archivo",
+                    JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+    private void openFile(){
+        if(running) return;
+        JFileChooser selectorArch = new JFileChooser();
+        selectorArch.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivo de texto","txt");
+        selectorArch.setFileFilter(filter);
+        int respuesta = selectorArch.showOpenDialog(this);
+
+        if(respuesta == JFileChooser.APPROVE_OPTION){
+            String aux="";
+            byte[][] new_world = world.world;
+            world.delAnts();
+            int gen=0,numOfAnts=0;
+            int aX,aY,neg90,bla90;
+            Color n90,b90;
+            char ori;
+            byte col_actual;
+            
+            try {
+                File arch = selectorArch.getSelectedFile();
+                FileReader arch_r = new FileReader(arch);
+                BufferedReader arch_bf = new BufferedReader(arch_r);
+                try {
+                    for(int y=0;y<1000;y++){
+                        for(int x=0;x<1000;x++){
+                            new_world[y][x] = arch_bf.read()=='.'?0:(byte)1;
+                        }
+                        arch_bf.read();
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(WindowSimul.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                try {
+                    aux = arch_bf.readLine();
+                    gen = Integer.parseInt(aux);
+                    aux = arch_bf.readLine();
+                    numOfAnts = Integer.parseInt(aux);
+                    for(int i=0;i<numOfAnts;i++){
+                        aux = arch_bf.readLine();
+                        aX=Integer.parseInt(aux);
+                        aux = arch_bf.readLine();
+                        aY=Integer.parseInt(aux);
+                        aux = arch_bf.readLine();
+                        ori = aux.charAt(0);
+                        aux = arch_bf.readLine();
+                        col_actual = (byte)Integer.parseInt(aux);
+                        aux = arch_bf.readLine();
+                        neg90 = Integer.parseInt(aux);
+                        aux = arch_bf.readLine();
+                        bla90 = Integer.parseInt(aux);
+                        n90=new Color((neg90>>16)&0xFF,(neg90>>8)&0xFF,(neg90>>0)&0xFF);
+                        b90=new Color((bla90>>16)&0xFF,(bla90>>8)&0xFF,(bla90>>0)&0xFF);
+                        world.addAnt(aX, aY, ori, col_actual, n90, b90);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(WindowSimul.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                generation = gen;
+                world.recalculateNumBlack();
+                sim_view.setWorldCells(world);
+                tool.actualizaDatos(gen,world.getNumBlack(),world.getNumAnts());
+                try {
+                    arch_bf.close();
+                    arch_r.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(WindowSimul.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(this,
+                "Error al intentar abrir el archvio\nError: "+ex,
+                "Error en Archivo",
+                JOptionPane.ERROR_MESSAGE);
+            }
+            tool.start_sim.setEnabled(true);
+        }
     }
 }

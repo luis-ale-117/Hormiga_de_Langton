@@ -44,17 +44,17 @@ public class World {
     public boolean isToroidal(){
         return toroidal;
     }
-    public void turnAnts(){
-        ants.forEach(ant -> {
-            ant.gira(world[ant.getX()][ant.getY()]);
-        });
-    }
+//    public void turnAnts(){
+//        ants.forEach(ant -> {
+//            ant.gira(world[ant.getX()][ant.getY()]);
+//        });
+//    }
     public void updateAntsPos(){
         for(Ant ant: ants){
-            ant.gira(world[ant.getX()][ant.getY()]);
+            ant.gira(world[ant.getY()][ant.getX()]);
             /*Where it is the ant, update color*/
-            if(world[ant.getX()][ant.getY()] == ant.color_actual){
-                world[ant.getX()][ant.getY()] = ant.color_siguiente;
+            if(world[ant.getY()][ant.getX()] == ant.color_actual){
+                world[ant.getY()][ant.getX()] = ant.color_siguiente;
                 if(ant.color_siguiente == POS_BLACK){
                     num_black++;
                 }else{
@@ -65,11 +65,11 @@ public class World {
             ant.avanza();
             /*Ant updates its current position color*/
             try {
-                ant.setColorActual(world[ant.getX()][ant.getY()]);
+                ant.setColorActual(world[ant.getY()][ant.getX()]);
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 if(isToroidal()){
                     ant.posInToroidal();
-                    ant.setColorActual(world[ant.getX()][ant.getY()]);
+                    ant.setColorActual(world[ant.getY()][ant.getX()]);
                 }else{
                     anyAntOutOfBounds = true;
                 }
@@ -80,11 +80,11 @@ public class World {
         return anyAntOutOfBounds;
     }
     public byte getPosColor(int x, int y){
-        return world[x][y];
+        return world[y][x];
     }
     public void setPosColor(int x, int y, byte col){
-        byte color_anterior = (byte)world[x][y];
-        world[x][y] = col;
+        byte color_anterior = (byte)world[y][x];
+        world[y][x] = col;
         if(color_anterior!=col){
             if(col == POS_WHITE){
                 num_black--;
@@ -102,7 +102,7 @@ public class World {
     public void resetWorld(){
         for(int x = 0;x<lim_x;x++){
             for(int y = 0;y<lim_x;y++){
-                world[x][y]=0;
+                world[y][x]=0;
             }
         }
         anyAntOutOfBounds = false;
@@ -118,10 +118,10 @@ public class World {
         for(int x = 0;x<lim_x;x++){
             for(int y = 0;y<lim_x;y++){
                 if(Math.random()<=porcenBlack){
-                    world[x][y]=(byte)1;
+                    world[y][x]=(byte)1;
                     num_black++;
                 }else{
-                    world[x][y]=(byte)0;
+                    world[y][x]=(byte)0;
                 }
             }
         }
@@ -145,7 +145,18 @@ public class World {
         }
         Color col_neg = getRandColorNeg();
         Color col_bla = getRandColorBla();
-        addAnt(randX,randY,randOri,world[randX][randY],col_neg,col_bla);
+        addAnt(randX,randY,randOri,world[randY][randX],col_neg,col_bla);
+    }
+    public void recalculateNumBlack(){
+        num_black=0;
+        for(byte[] fila: world){
+            for(byte b: fila){
+                num_black+=(int)b;
+            }
+        }
+    }
+    public void delAnts(){
+        ants.clear();
     }
     private Color getRandColorBla(){//Mas claros
         int R = (int)(Math.random()*128)+127;

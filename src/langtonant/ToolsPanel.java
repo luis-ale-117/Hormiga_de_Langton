@@ -3,17 +3,22 @@ package langtonant;
 
 import java.awt.Color;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 
 public class ToolsPanel extends JPanel{
     
     public int celTotales;
-    public JLabel generacion,celdas_negras,hormigas;
-    public JButton start_sim,zoom_out,zoom_in, new_ant,graph,reset,random;
+    public JLabel generacion,celdas_negras,hormigas,zo_label,vel_label;
+    public JButton start_sim, new_ant,graph,reset,random;
     public JToggleButton edit_cell;
+    public JSlider zoom_sld,vel_sld;
+    
     //public JComboBox hormiga_orientacion;
     
     ToolsPanel(int dimensionSimul, int dimenTool){
@@ -53,30 +58,44 @@ public class ToolsPanel extends JPanel{
         hormiga_orientacion.setBounds(90, 93, 90, 30);
         this.add(hormiga_orientacion);*/
         
-        zoom_out = new JButton("Zoom -");
-        zoom_out.setBounds(5, 124, 80, 30);
-        zoom_out.setEnabled(true);
-        this.add(zoom_out);
+        zoom_sld = new JSlider(-3,3,0);
+        zoom_sld.setMajorTickSpacing(1);
+        zoom_sld.setMinorTickSpacing(1);
+        zoom_sld.setPaintTicks(true);
+        zoom_sld.setPaintLabels(true);
+        zoom_sld.setBounds(5, 124, 160, 50);
+        zoom_sld.setBackground(Color.GRAY);
+        this.add(zoom_sld);
+        zo_label = new JLabel("ZOOM");
+        zo_label.setBounds(168, 130, 70, 30);
+        this.add(zo_label);
         
-        zoom_in = new JButton("Zoom +");
-        zoom_in.setBounds(90, 124, 80, 30);
-        zoom_in.setEnabled(true);
-        this.add(zoom_in);
-        
+        vel_sld = new JSlider(-3,3,0);
+        vel_sld.setMajorTickSpacing(1);
+        vel_sld.setMinorTickSpacing(1);
+        vel_sld.setPaintTicks(true);
+        vel_sld.setPaintLabels(true);
+        vel_sld.setBounds(5, 174, 160, 50);
+        vel_sld.setBackground(Color.GRAY);
+        this.add(vel_sld);
+        vel_label = new JLabel("SPEED");
+        vel_label.setBounds(168, 180, 70, 30);
+        this.add(vel_label);
+
         graph = new JButton("Graficas");
-        graph.setBounds(5, 155, 90, 30);
+        graph.setBounds(5, 230, 90, 30);
         this.add(graph);
         
         reset = new JButton("Reset");
-        reset.setBounds(100, 155, 80, 30);
+        reset.setBounds(100, 230, 80, 30);
         this.add(reset);
         
         random = new JButton("Random");
-        random.setBounds(5, 186, 90, 30);
+        random.setBounds(5, 265, 90, 30);
         this.add(random);
         
         edit_cell = new JToggleButton("Edit");
-        edit_cell.setBounds(5, 217, 90, 30);
+        edit_cell.setBounds(5, 300, 90, 30);
         this.add(edit_cell);
     }
     

@@ -91,7 +91,7 @@ public class SimulPanel extends JPanel{
     public void setWorldCells(World w){
         for(int x=0;x<num_celdas;x++){
             for(int y=0;y<num_celdas;y++){
-                if(w.world[x][y]==0){
+                if(w.world[y][x]==0){
                     simDraw.setColor(Color.WHITE);
                 }
                 else{
